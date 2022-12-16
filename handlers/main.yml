@@ -1,0 +1,6 @@
+---
+- name: restart jupyter service
+  become: yes
+  ansible.builtin.systemd:
+    state: restarted
+    name: "jupyterhub.service"

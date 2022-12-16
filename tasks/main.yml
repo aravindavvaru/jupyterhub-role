@@ -1,0 +1,52 @@
+---
+# tasks file for jupyter-playbook
+# - name: install python pip
+#   become: yes
+#   apt: 
+#     name: "{{ item }}"
+#     state: present 
+#   loop:
+#   - python3-pip
+#   - net-tools
+  
+# - name: Install python package
+#   ansible.builtin.pip:
+#     name: 
+#     - jupyterhub
+
+- ansible.builtin.set_fact:
+    jupyterhub_allowedusers: "{% for usr in allowed_users %}'{{ usr }}'{{ ', ' if not loop.last else '' }}{% endfor %}"
+    jupyterhub_blockedusers: "{% for usr in blocked_users %}'{{ usr }}'{{ ', ' if not loop.last else '' }}{% endfor %}"
+    jupyterhub_admins: "{% for usr in admins %}'{{ usr }}'{{ ', ' if not loop.last else '' }}{% endfor %}"
+
+# - name: add allowed users to system
+#   become: yes
+#   ansible.builtin.user:
+#     name: "{{ item }}"
+#     state: present
+#   with_items: "{{ allowed_users }}"
+
+- name: allow specific users to jupyterhub
+  become: yes
+  ansible.builtin.lineinfile:
+    path: "{{ jupyterhub_config }}"
+    regexp: "c.Authenticator.allowed_users"
+    line: "c.Authenticator.allowed_users = { {{ jupyterhub_allowedusers }} }"
+  notify: restart jupyter service
+
+- name: blocked users to jupyterhub
+  become: yes
+  ansible.builtin.lineinfile:
+    path: "{{ jupyterhub_config }}"
+    regexp: "c.Authenticator.blocked_users"
+    line: "c.Authenticator.blocked_users = { {{ jupyterhub_blockedusers }} }"
+  notify: restart jupyter service
+
+
+- name: set admin users to jupyterhub
+  become: yes
+  ansible.builtin.lineinfile:
+    path: "{{ jupyterhub_config }}"
+    regexp: "c.Authenticator.admin_users"
+    line: "c.Authenticator.admin_users = { {{ jupyterhub_admins }} }"
+  notify: restart jupyter service

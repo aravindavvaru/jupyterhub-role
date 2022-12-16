@@ -1,0 +1,16 @@
+---
+# vars file for jupyter-playbook
+allowed_users:
+  - root
+  - test
+  - jupyterlab
+  - vagrant
+
+
+blocked_users:
+  - none
+
+admins:
+  - jupyter
+
+jupyterhub_config: "/etc/jupyterhub/jupyterhub_config.py"
